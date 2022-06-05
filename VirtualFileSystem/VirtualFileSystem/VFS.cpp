@@ -14,7 +14,7 @@ namespace TestTask
 		File* file;
 		char* filePath = GetFilePath(name);
 		ReplaceSlashes(filePath);
-		filesystem::path p = filePath; //в случае отсутствия у компилятора SDK поддержки C++17, вероятно, можно использовать stat и mkdir		
+		filesystem::path p = filePath; //РІ СЃР»СѓС‡Р°Рµ РѕС‚СЃСѓС‚СЃС‚РІРёСЏ Сѓ РєРѕРјРїРёР»СЏС‚РѕСЂР° SDK РїРѕРґРґРµСЂР¶РєРё C++17, РІРµСЂРѕСЏС‚РЅРѕ, РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ stat Рё mkdir		
 		if (!filesystem::exists(p))
 		{
 			filesystem::create_directories(p);
