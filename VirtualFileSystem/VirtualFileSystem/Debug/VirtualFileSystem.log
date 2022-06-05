@@ -1,8 +1,2 @@
-﻿  File.cpp
-  VFS.cpp
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(67,14): warning C4244: инициализация: преобразование "std::streamsize" в "long", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(81,14): warning C4244: инициализация: преобразование "std::streamoff" в "long", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(161,21): warning C4018: <: несоответствие типов со знаком и без знака
-  VirtualFileSystem.cpp
-  Создание кода...
+﻿  VirtualFileSystem.cpp
   VirtualFileSystem.vcxproj -> E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\Debug\VirtualFileSystem.exe

@@ -3,6 +3,40 @@
 
 using namespace std;
 
+void ThreadFunction1(TestTask::IVFS* vfs)
+{
+    char info[50] = "Some File Info To Write";
+    TestTask::File* file = vfs->Create("D:\\SomeFolder\\file1.txt");
+    vfs->Write(file, info, 10);
+    this_thread::sleep_for(5000ms);
+    vfs->Close(file);
+    cout << "Thread 1 Complete!\n";
+}
+
+void ThreadFunction2(TestTask::IVFS* vfs)
+{
+    char info[50] = "Some Other File Info To Write";
+    char* rInfo = new char[50];
+    long count = 0;
+    this_thread::sleep_for(1000ms);
+    TestTask::File* file = vfs->Create("D:\\SomeFolder\\file1.txt");
+    if (file == nullptr)
+    {
+        cout << "This file is locked!\n";
+    }
+    file = vfs->Create("D:\\SomeFolder\\file2.txt");
+    vfs->Write(file, info, 10);
+    vfs->Close(file);
+    file = vfs->Open("D:\\SomeFolder\\file2.txt");
+    count = vfs->Read(file, rInfo, 5);
+    cout << "Reading to the file succeed. Total bytes read:\n";
+    cout << count << '\n';
+    cout << "Information:\n";
+    cout << rInfo << '\n';
+    vfs->Close(file);
+    cout << "Thread 2 Complete!\n";
+}
+
 int main()
 {
     TestTask::IVFS* vfs = TestTask::VirtualFileSystem::CreateInstance();
@@ -20,6 +54,7 @@ int main()
         cout << "3. Write\n";
         cout << "4. Read\n";
         cout << "5. Close\n";
+        cout << "6. Thread test\n";
         cin >> command;
         switch (command)
         {
@@ -88,6 +123,12 @@ int main()
                 vfs->Close(file);
             }
             cout << "File closed\n";
+            break;
+        case 6:
+            thread th1(ThreadFunction1, vfs);
+            thread th2(ThreadFunction2, vfs);
+            th1.join();
+            th2.join();
             break;
         }
     } while (true);
