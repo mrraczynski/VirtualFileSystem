@@ -2,6 +2,7 @@
 #define MAX_FILE_LENGTH 1000
 #define MAX_FILES_COUNT 16
 #include "IVFS.h"
+#include <iostream>
 
 namespace TestTask 
 {

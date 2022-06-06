@@ -1,13 +1,22 @@
-﻿#include <iostream>
-#include "VFS.h"
+﻿#include "VFS.h"
 
 using namespace std;
 
 void ThreadFunction1(TestTask::IVFS* vfs)
 {
+    int count = 0;
     char info[50] = "Some File Info To Write";
     TestTask::File* file = vfs->Create("D:\\SomeFolder\\file1.txt");
-    vfs->Write(file, info, 10);
+    if (file != nullptr)
+    {
+        cout << "Thread1: file1 is open for writing!\n";
+    }
+    count = vfs->Write(file, info, 10);
+    if (count > 0)
+    {
+        cout << "Thread1: Writing to the file1 succeeded. Total bytes written:\n";
+        cout << count << '\n';
+    }
     this_thread::sleep_for(5000ms);
     vfs->Close(file);
     cout << "Thread 1 Complete!\n";
@@ -22,17 +31,33 @@ void ThreadFunction2(TestTask::IVFS* vfs)
     TestTask::File* file = vfs->Create("D:\\SomeFolder\\file1.txt");
     if (file == nullptr)
     {
-        cout << "This file is locked!\n";
+        cout << "Thread2: This file1 is locked!\n";
     }
     file = vfs->Create("D:\\SomeFolder\\file2.txt");
-    vfs->Write(file, info, 10);
+    if (file != nullptr)
+    {
+        cout << "Thread2: file2 is open writing!\n";
+    }
+    count = vfs->Write(file, info, 10);
+    if (count > 0)
+    {
+        cout << "Thread2: Writing to the file2 succeeded. Total bytes written:\n";
+        cout << count << '\n';
+    }
     vfs->Close(file);
     file = vfs->Open("D:\\SomeFolder\\file2.txt");
+    if (file != nullptr)
+    {
+        cout << "Thread2: file2 is open for reading!\n";
+    }
     count = vfs->Read(file, rInfo, 5);
-    cout << "Reading to the file succeed. Total bytes read:\n";
-    cout << count << '\n';
-    cout << "Information:\n";
-    cout << rInfo << '\n';
+    if (count > 0)
+    {
+        cout << "Thread2: Reading from the file2 succeeded. Total bytes read:\n";
+        cout << count << '\n';
+        cout << "Thread2: Information:\n";
+        cout << rInfo << '\n';
+    }
     vfs->Close(file);
     cout << "Thread 2 Complete!\n";
 }
@@ -64,7 +89,11 @@ int main()
             file = vfs->Create(fileName);
             if (file)
             {
-                cout << file->name << " is opened for writeonly\n";
+                cout << fileName << " is open for writeonly\n";
+            }
+            else 
+            {
+                cout << fileName << " is not open\n";
             }
             break;
         case 2:
@@ -73,7 +102,11 @@ int main()
             file = vfs->Open(fileName);
             if (file)
             {
-                cout << file->name << " is opened for readonly\n";
+                cout << fileName << " is open for readonly\n";
+            }
+            else
+            {
+                cout << fileName << " is not open\n";
             }
             break;
         case 3:
@@ -86,7 +119,7 @@ int main()
             {
                 res = vfs->Write(file, info, len);
             }
-            if (res == -1)
+            if (res == 0)
             {
                 cout << "Writing to the file failed\n";
             }
@@ -106,11 +139,11 @@ int main()
             }
             if (res == 0)
             {
-                cout << "Reading to the file failed\n";
+                cout << "Reading from the file failed\n";
             }
             else
             {
-                cout << "Reading to the file succeed. Total bytes read:\n";
+                cout << "Reading from the file succeed. Total bytes read:\n";
                 cout << res << '\n';
                 cout << "Information:\n";
                 cout << recievedInfo << '\n';
@@ -121,6 +154,10 @@ int main()
             if (file != nullptr)
             {
                 vfs->Close(file);
+            }
+            else
+            {
+                cout << "There is no open file:\n";
             }
             cout << "File closed\n";
             break;
