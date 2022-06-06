@@ -66,6 +66,7 @@ int main()
 {
     TestTask::IVFS* vfs = TestTask::VirtualFileSystem::CreateInstance();
     TestTask::File* file = nullptr;
+    TestTask::File* buffFile = nullptr;
     char fileName[260];
     char info[1024];
     char* recievedInfo;
@@ -86,9 +87,10 @@ int main()
         case 1:
             cout << "Enter file name:\n";
             cin >> fileName;
-            file = vfs->Create(fileName);
-            if (file)
+            buffFile = vfs->Create(fileName);
+            if (buffFile != nullptr)
             {
+                file = buffFile;
                 cout << fileName << " is open for writeonly\n";
             }
             else 
@@ -99,9 +101,10 @@ int main()
         case 2:
             cout << "Enter file name:\n";
             cin >> fileName;
-            file = vfs->Open(fileName);
-            if (file)
+            buffFile = vfs->Open(fileName);
+            if (buffFile != nullptr)
             {
+                file = buffFile;
                 cout << fileName << " is open for readonly\n";
             }
             else
@@ -121,11 +124,11 @@ int main()
             }
             if (res == 0)
             {
-                cout << "Writing to the file failed\n";
+                cout << file->name << ": Writing to the file failed\n";
             }
             else
             {
-                cout << "Writing to the file succeed. Total bytes written:\n";
+                cout << file->name << ": Writing to the file succeed. Total bytes written:\n";
                 cout << res << '\n';
             }
             break;
@@ -139,11 +142,11 @@ int main()
             }
             if (res == 0)
             {
-                cout << "Reading from the file failed\n";
+                cout << file->name << ": Reading from the file failed\n";
             }
             else
             {
-                cout << "Reading from the file succeed. Total bytes read:\n";
+                cout << file->name << ": Reading from the file succeed. Total bytes read:\n";
                 cout << res << '\n';
                 cout << "Information:\n";
                 cout << recievedInfo << '\n';
@@ -154,12 +157,12 @@ int main()
             if (file != nullptr)
             {
                 vfs->Close(file);
+                cout << file->name << ": File closed\n";
             }
             else
             {
-                cout << "There is no open file:\n";
+                cout << "There is no open file.\n";
             }
-            cout << "File closed\n";
             break;
         case 6:
             thread th1(ThreadFunction1, vfs);
