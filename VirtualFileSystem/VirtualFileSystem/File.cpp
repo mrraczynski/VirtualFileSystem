@@ -2,9 +2,11 @@
 
 namespace TestTask
 {
-	File::File(const char* nm, long int len)
+	File::File(const char* nm)
 	{
 		strcpy_s(name, strlen(name), nm);
-		length = len;
+		length = 0;
+		startPoint = 0;
+		realFileName[0] = '\0';
 	}
 }

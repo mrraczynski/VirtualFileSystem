@@ -64,7 +64,7 @@ void ThreadFunction2(TestTask::IVFS* vfs)
 
 int main()
 {
-    TestTask::IVFS* vfs = TestTask::VirtualFileSystem::CreateInstance();
+    TestTask::VirtualFileSystem* vfs = new TestTask::VirtualFileSystem("D:\\VFSFolder");
     TestTask::File* file = nullptr;
     TestTask::File* buffFile = nullptr;
     char fileName[260];
@@ -74,6 +74,10 @@ int main()
     long res = -1, len = 0;
     do
     {
+        if (vfs == NULL)
+        {
+            break;
+        }
         cout << "Please, select command:\n";
         cout << "1. Create/open writeonly\n";
         cout << "2. Open readonly\n";
@@ -81,6 +85,7 @@ int main()
         cout << "4. Read\n";
         cout << "5. Close\n";
         cout << "6. Thread test\n";
+        cout << "7. Delete file system\n";
         cin >> command;
         switch (command)
         {
@@ -121,15 +126,15 @@ int main()
             if (file != nullptr)
             {
                 res = vfs->Write(file, info, len);
-            }
-            if (res == 0)
-            {
-                cout << file->name << ": Writing to the file failed\n";
-            }
-            else
-            {
-                cout << file->name << ": Writing to the file succeed. Total bytes written:\n";
-                cout << res << '\n';
+                if (res == 0)
+                {
+                    cout << file->name << ": Writing to the file failed\n";
+                }
+                else
+                {
+                    cout << file->name << ": Writing to the file succeed. Total bytes written:\n";
+                    cout << res << '\n';
+                }
             }
             break;
         case 4:
@@ -139,17 +144,17 @@ int main()
             if (file != nullptr)
             {
                 res = vfs->Read(file, recievedInfo, len);
-            }
-            if (res == 0)
-            {
-                cout << file->name << ": Reading from the file failed\n";
-            }
-            else
-            {
-                cout << file->name << ": Reading from the file succeed. Total bytes read:\n";
-                cout << res << '\n';
-                cout << "Information:\n";
-                cout << recievedInfo << '\n';
+                if (res == 0)
+                {
+                    cout << file->name << ": Reading from the file failed\n";
+                }
+                else
+                {
+                    cout << file->name << ": Reading from the file succeed. Total bytes read:\n";
+                    cout << res << '\n';
+                    cout << "Information:\n";
+                    cout << recievedInfo << '\n';
+                }
             }
             delete[] recievedInfo;
             break;
@@ -165,10 +170,13 @@ int main()
             }
             break;
         case 6:
-            thread th1(ThreadFunction1, vfs);
-            thread th2(ThreadFunction2, vfs);
-            th1.join();
-            th2.join();
+            //thread th1(ThreadFunction1, vfs);
+            //thread th2(ThreadFunction2, vfs);
+            //th1.join();
+            //th2.join();
+            break;
+        case 7:
+            delete vfs;
             break;
         }
     } while (true);

@@ -1,40 +1,68 @@
 #include "VFS.h"
-#include <fstream>
 #include <filesystem>
+#include <string>
 
 using namespace std;
 
 namespace TestTask
 {
-	File* VirtualFileSystem::files[MAX_FILES_COUNT];
+	int VirtualFileSystem::curRealFile = 0;
+	int VirtualFileSystem::futRealFile = 0;
+
+	VirtualFileSystem::VirtualFileSystem(const char* folder)
+	{
+		try
+		{
+			for (int i = 0; i < MAX_FILES_COUNT; i++)
+			{
+				files[i] = nullptr;
+			}
+			if (curRealFile < MAX_REAL_FILES_COUNT)
+			{
+				curRealFile = futRealFile;
+				ofstream myfile;
+				filesystem::path p = folder; //в случае отсутствия у компилятора SDK поддержки C++17, вероятно, можно использовать stat и mkdir		
+				if (!filesystem::exists(p))
+				{
+					filesystem::create_directories(p);
+				}
+
+				std::string tmp = std::to_string(curRealFile);
+				char const* num_char = tmp.c_str();
+				realFiles[curRealFile][0] = '\0';
+				strcat_s(realFiles[curRealFile], 260, folder);
+				strcat_s(realFiles[curRealFile], 260, "\\File");
+				strcat_s(realFiles[curRealFile], 260, num_char);
+				strcat_s(realFiles[curRealFile], 260, ".vfs");
+				myfile.open(realFiles[curRealFile], ios::out | ios::binary);
+				myfile.close();
+				futRealFile++;
+			}
+			else 
+			{
+				cout << "Cannot create a new file on the disk:\n";
+			}
+		}
+		catch (exception& e)
+		{
+			cout << "An error has occurred:\n" << e.what() << endl;
+		}
+	}
 
 	File* VirtualFileSystem::Create(const char* name)
 	{
-		char* filePath = nullptr;
 		try
 		{
-			ofstream myfile;
-			File* file;
-			filePath = GetFilePath(name);
-			ReplaceSlashes(filePath);
-			filesystem::path p = filePath; //в случае отсутствия у компилятора SDK поддержки C++17, вероятно, можно использовать stat и mkdir		
-			if (!filesystem::exists(p))
-			{
-				filesystem::create_directories(p);
-			}
-			file = GetFile(name);
+			File* file = GetFile(name);
 			if (file != nullptr)
 			{
 				if (!file->isReadOnly)
 				{
 					if ((file->isWriteOnly && *file->writerThreadIdPointer == this_thread::get_id()) || !file->isWriteOnly)
 					{
-						myfile.open(name, ios::out | ios::binary);
 						file->isWriteOnly = true;
 						file->writerThreadId = std::this_thread::get_id();
 						file->writerThreadIdPointer = &file->writerThreadId;
-						myfile.close();
-						delete[] filePath;
 						return file;
 					}
 					else
@@ -55,10 +83,8 @@ namespace TestTask
 		catch (exception& e)
 		{
 			cout << "An error has occurred:\n" << e.what() << endl;
-			delete[] filePath;
 			return nullptr;
 		}
-		delete[] filePath;
 		return nullptr;
 	}
 
@@ -66,16 +92,13 @@ namespace TestTask
 	{
 		try
 		{
-			ifstream myfile;
 			File* file;
 			file = GetFile(name, true);
 			if (file != nullptr)
 			{
 				if (!file->isWriteOnly)
 				{
-					myfile.open(name, ios::in | ios::binary);
 					file->isReadOnly = true;
-					myfile.close();
 					return file;
 				}
 				else
@@ -104,10 +127,11 @@ namespace TestTask
 			{
 				if (f->isReadOnly)
 				{
-					ifstream myfile(f->name, ios::in | ios::binary);
-					istream* result = &myfile.read(buff, len);
+					myFileIn.open(realFiles[curRealFile], ios::in | ios::binary);
+					myFileIn.seekg(f->startPoint);
+					istream* result = &myFileIn.read(buff, len);
 					long size = result->gcount();
-					myfile.close();
+					myFileIn.close();
 					return size;
 				}
 				else
@@ -134,12 +158,75 @@ namespace TestTask
 		{
 			if (f != nullptr && f->isWriteOnly && *f->writerThreadIdPointer == this_thread::get_id())
 			{
-				fstream myfile(f->name, ios::out | ios::binary);
-				ostream* result = &myfile.write(buff, len);
-				result->seekp(0, result->end);
-				long size = result->tellp();
-				myfile.close();
-				return size;
+				if (GetMaxPosition() + len > MAX_REAL_FILE_LENGTH)
+				{
+					cout << "Not enough space\n";
+					return 0;
+				}
+				std::lock_guard<std::mutex> guard(mtx);
+				long size;
+				if (f->isNewFile)
+				{
+					myFileOut.open(realFiles[curRealFile], ios::app | ios::binary);
+					myFileOut.seekp(GetMaxPosition());
+					size = myFileOut.tellp();
+					f->startPoint = size;
+					strcpy_s(f->realFileName, 260, realFiles[curRealFile]);
+					ostream* result = &myFileOut.write(buff, len);
+					result->seekp(0, result->end);
+					size = result->tellp();
+					f->length = size - f->startPoint;
+					f->isNewFile = false;
+					myFileOut.close();
+				}
+				else if (len < f->length && !f->isNewFile)
+				{
+					char contentBuf[MAX_REAL_FILE_LENGTH + 1];
+					myFileOut.open(realFiles[curRealFile], ios::in | ios::binary);
+					myFileOut.seekg(f->startPoint + f->length);
+					myFileOut.read(contentBuf, MAX_REAL_FILE_LENGTH);
+					myFileOut.close();
+					myFileOut.open(realFiles[curRealFile], ios::in | ios::out | ios::binary);
+					myFileOut.seekp(f->startPoint + len);
+					int y = myFileOut.tellp();
+					int i = ChangeFilesStartPos(f, len);
+					contentBuf[i] = '\0';
+					myFileOut.write(contentBuf, i);
+					myFileOut.seekp(f->startPoint);
+					ostream* result = &myFileOut.write(buff, len);
+					size = result->tellp();
+					f->length = size - f->startPoint;
+					myFileOut.close();
+				}
+				else if (len == f->length && !f->isNewFile)
+				{
+					myFileOut.open(realFiles[curRealFile], ios::in | ios::out | ios::binary);
+					myFileOut.seekp(f->startPoint);
+					ostream* result = &myFileOut.write(buff, len);
+					myFileOut.close();
+				}
+				else if(len > f->length && !f->isNewFile)
+				{
+					char contentBuf[MAX_REAL_FILE_LENGTH + 1];
+					myFileOut.open(realFiles[curRealFile], ios::in | ios::binary);
+					myFileOut.seekg(f->startPoint + f->length);
+					myFileOut.read(contentBuf, MAX_REAL_FILE_LENGTH);
+					myFileOut.close();
+					myFileOut.open(realFiles[curRealFile], ios::in | ios::out | ios::binary);
+					myFileOut.seekp(f->startPoint);
+					int y = myFileOut.tellp();
+					int i = ChangeFilesStartPos(f, 0);
+					contentBuf[i] = '\0';
+					myFileOut.write(contentBuf, i);
+					y = myFileOut.tellp();
+					myFileOut.seekp(GetMaxPosition());
+					f->startPoint = myFileOut.tellp();
+					ostream* result = &myFileOut.write(buff, len);
+					size = result->tellp();
+					f->length = size - f->startPoint;
+					myFileOut.close();
+				}
+				return f->length;
 			}
 			else if(f == nullptr)
 			{
@@ -153,7 +240,7 @@ namespace TestTask
 				}
 				else if (*f->writerThreadIdPointer != this_thread::get_id())
 				{
-					cout << "The file is being edited by another user\n";
+					cout << "The file is being edited by another thread\n";
 				}
 			}
 		}
@@ -169,25 +256,17 @@ namespace TestTask
 	{
 		try
 		{
-			ifstream myfile;
 			if (f != nullptr)
 			{
-				myfile.open(f->name, ios::in);
 				f->isReadOnly = false;
 				f->isWriteOnly = false;
 				f->writerThreadIdPointer = nullptr;
-				myfile.close();
 			}
 		}
 		catch (exception& e)
 		{
 			cout << "An error has occurred:\n" << e.what() << endl;
 		}
-	}
-
-	IVFS* VirtualFileSystem::CreateInstance()
-	{
-		return static_cast<IVFS*>(new VirtualFileSystem());
 	}
 
 	char* VirtualFileSystem::GetFilePath(const char* name)
@@ -217,6 +296,7 @@ namespace TestTask
 
 	File* VirtualFileSystem::GetFile(const char* name, bool getFromArray)
 	{
+		std::lock_guard<std::mutex> guard(mtx);
 		for (int i = 0; i < MAX_FILES_COUNT; i++)
 		{
 			if (files[i] != nullptr)
@@ -230,8 +310,9 @@ namespace TestTask
 			{
 				if (!getFromArray)
 				{
-					File* newFile = new File(name, 0);
+					File* newFile = new File(name);
 					files[i] = newFile;
+					//SetFilePosition(newFile, i);
 					return newFile;
 				}
 				else
@@ -253,4 +334,58 @@ namespace TestTask
 			}
 		}
 	}
+
+	int VirtualFileSystem::GetRealFileNum(File* file)
+	{
+		for (int i = 0; i < MAX_REAL_FILES_COUNT; i++)
+		{
+			if (strcmp(realFiles[i], file->realFileName) == 0)
+			{
+				return i;
+			}
+		}
+		return 0;
+	}
+
+	long VirtualFileSystem::ChangeFilesStartPos(File* curFile, long offset)
+	{
+		long totalLen = 0;
+		for (int i = 0; i < MAX_FILES_COUNT; i++)
+		{
+			if (files[i] != nullptr)
+			{
+				if (strcmp(files[i]->realFileName, curFile->realFileName) == 0 && strcmp(curFile->name, files[i]->name) != 0 && files[i]->startPoint > curFile->startPoint)
+				{
+					files[i]->startPoint = files[i]->startPoint - curFile->length + offset;
+					totalLen = totalLen = files[i]->length;
+				}
+			}
+			else
+			{
+				return totalLen;
+			}
+		}
+		return totalLen;
+	}
+
+	long VirtualFileSystem::GetMaxPosition()
+	{
+		long maxValue = 0;
+		for (int i = 0; i < MAX_FILES_COUNT; i++)
+		{
+			if (files[i] != nullptr)
+			{
+				if (maxValue < files[i]->startPoint + files[i]->length)
+				{
+					maxValue = files[i]->startPoint + files[i]->length;
+				}
+			}
+			else
+			{
+				break;
+			}
+		}
+		return maxValue;
+	}
+
 }

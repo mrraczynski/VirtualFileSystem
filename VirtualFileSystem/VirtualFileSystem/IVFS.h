@@ -7,14 +7,18 @@ namespace TestTask
 	{	
 	public:
 		char name[260];
-		long int length;
+		char realFileName[260];
+		long length;
+		long startPoint;
+
 
 		bool isReadOnly = false;
 		bool isWriteOnly = false;
+		bool isNewFile = true;
 		std::thread::id writerThreadId;
 		std::thread::id* writerThreadIdPointer = &writerThreadId;
 
-		File(const char* nm, long int len);
+		File(const char* nm);
 	};
 
 	struct IVFS
