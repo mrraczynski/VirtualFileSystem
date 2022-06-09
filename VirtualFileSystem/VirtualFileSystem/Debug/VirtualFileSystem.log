@@ -1,2 +1,4 @@
 ﻿  VirtualFileSystem.cpp
+E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem.cpp(6,1): warning C4326: возвращаемый тип "main" должен быть "int", а не "void"
+E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem.cpp(104,23): warning C4101: e: неиспользованная локальная переменная
   VirtualFileSystem.vcxproj -> E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\Debug\VirtualFileSystem.exe

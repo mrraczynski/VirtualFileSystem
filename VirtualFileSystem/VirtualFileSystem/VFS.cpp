@@ -13,20 +13,18 @@ namespace TestTask
 	{
 		try
 		{
-			for (int i = 0; i < MAX_FILES_COUNT; i++)
-			{
-				files[i] = nullptr;
-			}
+			curRealFile = futRealFile;
 			if (curRealFile < MAX_REAL_FILES_COUNT)
 			{
-				curRealFile = futRealFile;
 				ofstream myfile;
 				filesystem::path p = folder; //в случае отсутствия у компилятора SDK поддержки C++17, вероятно, можно использовать stat и mkdir		
 				if (!filesystem::exists(p))
 				{
-					filesystem::create_directories(p);
+					if (!filesystem::create_directories(p))
+					{
+						throw std::runtime_error("Cannot create folder");
+					}
 				}
-
 				std::string tmp = std::to_string(curRealFile);
 				char const* num_char = tmp.c_str();
 				realFiles[curRealFile][0] = '\0';
@@ -38,14 +36,19 @@ namespace TestTask
 				myfile.close();
 				futRealFile++;
 			}
-			else 
+			else
 			{
-				cout << "Cannot create a new file on the disk:\n";
+				throw std::runtime_error("Cannot create a new file on the disk");
+			}
+			for (int i = 0; i < MAX_FILES_COUNT; i++)
+			{
+				files[i] = nullptr;
 			}
 		}
 		catch (exception& e)
 		{
 			cout << "An error has occurred:\n" << e.what() << endl;
+			throw;
 		}
 	}
 
