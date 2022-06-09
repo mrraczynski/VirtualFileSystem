@@ -1,14 +1,2 @@
-﻿  VFS.cpp
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(133,16): warning C4244: инициализация: преобразование "std::streamsize" в "long", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(172,28): warning C4244: =: преобразование "std::streamoff" в "long", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(177,26): warning C4244: =: преобразование "std::streamoff" в "long", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(182,18): warning C4018: <: несоответствие типов со знаком и без знака
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(191,12): warning C4244: инициализация: преобразование "std::streamoff" в "int", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(197,26): warning C4244: =: преобразование "std::streamoff" в "long", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(208,17): warning C4018: >: несоответствие типов со знаком и без знака
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(217,12): warning C4244: инициализация: преобразование "std::streamoff" в "int", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(221,25): warning C4244: =: преобразование "std::streamoff" в "int", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(223,37): warning C4244: =: преобразование "std::streamoff" в "long", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(225,26): warning C4244: =: преобразование "std::streamoff" в "long", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(329,21): warning C4018: <: несоответствие типов со знаком и без знака
+﻿  VirtualFileSystem.cpp
   VirtualFileSystem.vcxproj -> E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\Debug\VirtualFileSystem.exe

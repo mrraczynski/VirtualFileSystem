@@ -49,11 +49,20 @@ namespace TestTask
 		}
 	}
 
+	VirtualFileSystem::~VirtualFileSystem()
+	{
+		for (int i = 0; i < MAX_FILES_COUNT; i++)
+		{
+			delete files[i];
+		}
+	}
+
 	File* VirtualFileSystem::Create(const char* name)
 	{
 		try
 		{
 			File* file = GetFile(name);
+			std::lock_guard<shared_mutex> lock(mtx);
 			if (file != nullptr)
 			{
 				if (!file->isReadOnly)
@@ -127,11 +136,12 @@ namespace TestTask
 			{
 				if (f->isReadOnly)
 				{
-					myFileIn.open(realFiles[curRealFile], ios::in | ios::binary);
-					myFileIn.seekg(f->startPoint);
-					istream* result = &myFileIn.read(buff, len);
+					std::shared_lock<shared_mutex> lock(mtx);
+					myFileOut.open(realFiles[curRealFile], ios::in | ios::binary);
+					myFileOut.seekg(f->startPoint);
+					istream* result = &myFileOut.read(buff, len);
 					long size = result->gcount();
-					myFileIn.close();
+					myFileOut.close();
 					return size;
 				}
 				else
@@ -163,8 +173,8 @@ namespace TestTask
 					cout << "Not enough space\n";
 					return 0;
 				}
-				std::lock_guard<std::mutex> guard(mtx);
 				long size;
+				std::lock_guard<shared_mutex> lock(mtx);
 				if (f->isNewFile)
 				{
 					myFileOut.open(realFiles[curRealFile], ios::app | ios::binary);
@@ -188,7 +198,6 @@ namespace TestTask
 					myFileOut.close();
 					myFileOut.open(realFiles[curRealFile], ios::in | ios::out | ios::binary);
 					myFileOut.seekp(f->startPoint + len);
-					int y = myFileOut.tellp();
 					int i = ChangeFilesStartPos(f, len);
 					contentBuf[i] = '\0';
 					myFileOut.write(contentBuf, i);
@@ -214,11 +223,9 @@ namespace TestTask
 					myFileOut.close();
 					myFileOut.open(realFiles[curRealFile], ios::in | ios::out | ios::binary);
 					myFileOut.seekp(f->startPoint);
-					int y = myFileOut.tellp();
 					int i = ChangeFilesStartPos(f, 0);
 					contentBuf[i] = '\0';
 					myFileOut.write(contentBuf, i);
-					y = myFileOut.tellp();
 					myFileOut.seekp(GetMaxPosition());
 					f->startPoint = myFileOut.tellp();
 					ostream* result = &myFileOut.write(buff, len);
@@ -269,34 +276,9 @@ namespace TestTask
 		}
 	}
 
-	char* VirtualFileSystem::GetFilePath(const char* name)
-	{
-		char* filePath;
-		for (int i = strlen(name); i - 1 >= 0; i--)
-		{
-			if (name[i] == '\\')
-			{
-				filePath = new char[i + 1];
-				filePath = CopyStringToPosition(name, filePath, i);
-				return filePath;
-			}
-		}		
-		return nullptr;
-	}
-
-	char* VirtualFileSystem::CopyStringToPosition(const char* copyFrom, char* copyTo, int endPos)
-	{
-		for (int i = 0; i < endPos; i++)
-		{
-			copyTo[i] = copyFrom[i];
-		}
-		copyTo[endPos] = '\0';
-		return copyTo;
-	}
-
+	//get existing file or create new one
 	File* VirtualFileSystem::GetFile(const char* name, bool getFromArray)
 	{
-		std::lock_guard<std::mutex> guard(mtx);
 		for (int i = 0; i < MAX_FILES_COUNT; i++)
 		{
 			if (files[i] != nullptr)
@@ -323,7 +305,7 @@ namespace TestTask
 		}
 		return nullptr;
 	}
-
+	//replace slashes for filesys lib
 	void VirtualFileSystem::ReplaceSlashes(char* name)
 	{
 		for (int i = 0; i < strlen(name); i++)
@@ -334,19 +316,7 @@ namespace TestTask
 			}
 		}
 	}
-
-	int VirtualFileSystem::GetRealFileNum(File* file)
-	{
-		for (int i = 0; i < MAX_REAL_FILES_COUNT; i++)
-		{
-			if (strcmp(realFiles[i], file->realFileName) == 0)
-			{
-				return i;
-			}
-		}
-		return 0;
-	}
-
+	//offseting files positions if we move some file to the end
 	long VirtualFileSystem::ChangeFilesStartPos(File* curFile, long offset)
 	{
 		long totalLen = 0;
@@ -367,7 +337,7 @@ namespace TestTask
 		}
 		return totalLen;
 	}
-
+	//get max position for writing at the end of file (in some cases we can have redundant symbols so we cannot use ios_base::end)
 	long VirtualFileSystem::GetMaxPosition()
 	{
 		long maxValue = 0;

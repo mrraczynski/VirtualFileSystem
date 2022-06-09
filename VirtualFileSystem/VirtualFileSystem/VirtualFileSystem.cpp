@@ -2,71 +2,12 @@
 
 using namespace std;
 
-void ThreadFunction1(TestTask::IVFS* vfs)
-{
-    int count = 0;
-    char info[50] = "Some File Info To Write";
-    TestTask::File* file = vfs->Create("D:\\SomeFolder\\file1.txt");
-    if (file != nullptr)
-    {
-        cout << "Thread1: file1 is open for writing!\n";
-    }
-    count = vfs->Write(file, info, 10);
-    if (count > 0)
-    {
-        cout << "Thread1: Writing to the file1 succeeded. Total bytes written:\n";
-        cout << count << '\n';
-    }
-    this_thread::sleep_for(5000ms);
-    vfs->Close(file);
-    cout << "Thread 1 Complete!\n";
-}
-
-void ThreadFunction2(TestTask::IVFS* vfs)
-{
-    char info[50] = "Some Other File Info To Write";
-    char* rInfo = new char[50];
-    long count = 0;
-    this_thread::sleep_for(1000ms);
-    TestTask::File* file = vfs->Create("D:\\SomeFolder\\file1.txt");
-    if (file == nullptr)
-    {
-        cout << "Thread2: This file1 is locked!\n";
-    }
-    file = vfs->Create("D:\\SomeFolder\\file2.txt");
-    if (file != nullptr)
-    {
-        cout << "Thread2: file2 is open writing!\n";
-    }
-    count = vfs->Write(file, info, 10);
-    if (count > 0)
-    {
-        cout << "Thread2: Writing to the file2 succeeded. Total bytes written:\n";
-        cout << count << '\n';
-    }
-    vfs->Close(file);
-    file = vfs->Open("D:\\SomeFolder\\file2.txt");
-    if (file != nullptr)
-    {
-        cout << "Thread2: file2 is open for reading!\n";
-    }
-    count = vfs->Read(file, rInfo, 5);
-    if (count > 0)
-    {
-        cout << "Thread2: Reading from the file2 succeeded. Total bytes read:\n";
-        cout << count << '\n';
-        cout << "Thread2: Information:\n";
-        cout << rInfo << '\n';
-    }
-    vfs->Close(file);
-    cout << "Thread 2 Complete!\n";
-}
-
 int main()
 {
     TestTask::VirtualFileSystem* vfs = new TestTask::VirtualFileSystem("D:\\VFSFolder");
     TestTask::File* file = nullptr;
     TestTask::File* buffFile = nullptr;
+    thread th1, th2;
     char fileName[260];
     char info[1024];
     char* recievedInfo;
@@ -74,18 +15,13 @@ int main()
     long res = -1, len = 0;
     do
     {
-        if (vfs == NULL)
-        {
-            break;
-        }
         cout << "Please, select command:\n";
         cout << "1. Create/open writeonly\n";
         cout << "2. Open readonly\n";
         cout << "3. Write\n";
         cout << "4. Read\n";
         cout << "5. Close\n";
-        cout << "6. Thread test\n";
-        cout << "7. Delete file system\n";
+        cout << "6. Delete file system\n";
         cin >> command;
         switch (command)
         {
@@ -170,12 +106,6 @@ int main()
             }
             break;
         case 6:
-            //thread th1(ThreadFunction1, vfs);
-            //thread th2(ThreadFunction2, vfs);
-            //th1.join();
-            //th2.join();
-            break;
-        case 7:
             delete vfs;
             break;
         }
