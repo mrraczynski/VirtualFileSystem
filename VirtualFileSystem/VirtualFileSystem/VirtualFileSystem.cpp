@@ -62,15 +62,8 @@ int main()
             if (file != nullptr)
             {
                 res = vfs->Write(file, info, len);
-                if (res == 0)
-                {
-                    cout << file->name << ": Writing to the file failed\n";
-                }
-                else
-                {
-                    cout << file->name << ": Writing to the file succeed. Total bytes written:\n";
-                    cout << res << '\n';
-                }
+                cout << file->name << ": Writing to the file succeed. Total bytes written:\n";
+                cout << res << '\n';
             }
             break;
         case 4:
@@ -80,17 +73,10 @@ int main()
             if (file != nullptr)
             {
                 res = vfs->Read(file, recievedInfo, len);
-                if (res == 0)
-                {
-                    cout << file->name << ": Reading from the file failed\n";
-                }
-                else
-                {
-                    cout << file->name << ": Reading from the file succeed. Total bytes read:\n";
-                    cout << res << '\n';
-                    cout << "Information:\n";
-                    cout << recievedInfo << '\n';
-                }
+                cout << file->name << ": Reading from the file succeed. Total bytes read:\n";
+                cout << res << '\n';
+                cout << "Information:\n";
+                cout << recievedInfo << '\n';
             }
             delete[] recievedInfo;
             break;
