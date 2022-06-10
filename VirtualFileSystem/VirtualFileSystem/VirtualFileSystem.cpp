@@ -6,6 +6,7 @@ void main()
 {
     try
     {
+        bool isLooping = true;
         char folderName[260];
         cout << "Please, enter the folder name:\n";
         cin >> folderName;
@@ -97,9 +98,10 @@ void main()
                 break;
             case 6:
                 delete vfs;
+                isLooping = false;
                 break;
             }
-        } while (true);
+        } while (isLooping);
     }
     catch (exception& e)
     {        

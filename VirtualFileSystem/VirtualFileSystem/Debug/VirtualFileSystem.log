@@ -1,14 +1,4 @@
-﻿  File.cpp
-  VFS.cpp
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(146,16): warning C4244: инициализация: преобразование "std::streamsize" в "long", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(185,28): warning C4244: =: преобразование "std::streamoff" в "size_t", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(190,26): warning C4244: =: преобразование "std::streamoff" в "size_t", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(209,26): warning C4244: =: преобразование "std::streamoff" в "size_t", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(233,37): warning C4244: =: преобразование "std::streamoff" в "size_t", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(235,26): warning C4244: =: преобразование "std::streamoff" в "size_t", возможна потеря данных
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VFS.cpp(314,21): warning C4018: <: несоответствие типов со знаком и без знака
-  VirtualFileSystem.cpp
+﻿  VirtualFileSystem.cpp
 E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem.cpp(6,1): warning C4326: возвращаемый тип "main" должен быть "int", а не "void"
-E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem.cpp(104,23): warning C4101: e: неиспользованная локальная переменная
-  Создание кода...
+E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem\VirtualFileSystem.cpp(106,23): warning C4101: e: неиспользованная локальная переменная
   VirtualFileSystem.vcxproj -> E:\Projects\GitHub\VirtualFileSystem\VirtualFileSystem\Debug\VirtualFileSystem.exe
