@@ -8,8 +8,8 @@ namespace TestTask
 	public:
 		char name[260];
 		char realFileName[260];
-		long length;
-		long startPoint;
+		size_t length;
+		size_t startPoint;
 
 
 		bool isReadOnly = false;

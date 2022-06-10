@@ -1,7 +1,4 @@
 #pragma once
-#define MAX_FILES_COUNT 16
-#define MAX_REAL_FILES_COUNT 4
-#define MAX_REAL_FILE_LENGTH 1000
 #include "IVFS.h"
 #include <mutex>
 #include <shared_mutex>
@@ -10,6 +7,10 @@
 
 namespace TestTask 
 {
+	constexpr size_t MAX_REAL_FILE_LENGTH = 1000;
+	constexpr size_t MAX_REAL_FILES_COUNT = 1000;
+	constexpr size_t MAX_FILES_COUNT = 16;
+
 	class VirtualFileSystem : public IVFS
 	{
 	public:
@@ -33,7 +34,7 @@ namespace TestTask
 		File* GetFile(const char* name, bool getFromArray = false);
 		void ReplaceSlashes(char* name);
 		long ChangeFilesStartPos(File* curFile, long offset);
-		long GetMaxPosition();
+		size_t GetMaxPosition();
 	};
 
 }

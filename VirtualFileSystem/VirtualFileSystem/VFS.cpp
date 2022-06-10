@@ -176,7 +176,7 @@ namespace TestTask
 					cout << "Not enough space\n";
 					return 0;
 				}
-				long size;
+				size_t size;
 				std::lock_guard<shared_mutex> lock(mtx);
 				if (f->isNewFile)
 				{
@@ -341,9 +341,9 @@ namespace TestTask
 		return totalLen;
 	}
 	//get max position for writing at the end of file (in some cases we can have redundant symbols so we cannot use ios_base::end)
-	long VirtualFileSystem::GetMaxPosition()
+	size_t VirtualFileSystem::GetMaxPosition()
 	{
-		long maxValue = 0;
+		size_t maxValue = 0;
 		for (int i = 0; i < MAX_FILES_COUNT; i++)
 		{
 			if (files[i] != nullptr)
